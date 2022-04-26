@@ -25,22 +25,7 @@ pipeline {
         }
       }
     }
-     
-    stage('Build') {
-      steps {
-        sh 'yarn install'
-        sh 'yarn build'
-      }
-    }  
-
-    stage('Publish') {
-        steps {
-            withAWS(region:'us-west-2', credentials:'jasonevans') {
-                s3Upload(bucket: "cds4cpm-painmanager-${env.ENVIRONMENT_NAME}", path: 'AHRQ-CDS-Connect-PAIN-MANAGEMENT-SUMMARY', workingDir: 'build', includePathPattern: '**/*')
-            }
-        }
-    }
-
+    
     stage('Docker Build') {
           steps {
             sh "docker build -t contentgroup/painmanager:${env.DOCKER_LABEL} ."
