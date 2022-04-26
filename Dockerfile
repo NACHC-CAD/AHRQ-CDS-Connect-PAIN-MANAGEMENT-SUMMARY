@@ -1,11 +1,12 @@
-FROM node:12 as builder
+FROM node:14 as builder
+
 
 RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
 WORKDIR /home/node/app
 
-COPY --chown=node:node package*.json ./
+COPY package*.json ./
+COPY yarn.lock ./
 USER node
-RUN yarn add core-js
 RUN yarn install
 
 COPY --chown=node:node . .
