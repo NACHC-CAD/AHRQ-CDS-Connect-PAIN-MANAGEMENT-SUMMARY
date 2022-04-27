@@ -1,17 +1,16 @@
-FROM node:14 as builder
+FROM nginx:1.21.6-alpine
 
+ENV PUBLIC_URL=.
+ENV CDS_URL=
 
-RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
+RUN apk add -U --no-cache nghttp2-dev nodejs yarn
+
+RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
-
 COPY package*.json ./
 COPY yarn.lock ./
-USER node
 RUN yarn install
 
-COPY --chown=node:node . .
-RUN yarn build
-
-FROM nginx:alpine
+COPY . .
 COPY default.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /home/node/app/build/ /usr/share/nginx/html
+CMD ["/bin/sh", "-c", "export REACT_APP_CDS_URL=${CDS_URL} && export REACT_APP_PUBLIC_URL=${PUBLIC_URL} && yarn build && cp -r /home/node/app/build/* /usr/share/nginx/html && cd /usr/share/nginx/html && nginx -g \"daemon off;\""]
